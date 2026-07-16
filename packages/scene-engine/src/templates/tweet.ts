@@ -79,12 +79,15 @@ function pushBlock(nodes: SceneNode[], prefix: string, path: string, block: Laid
 }
 
 // ---- nome / @handle derivados do brand kit (display name à parte chega depois) ----
+// Sem handle (conta não conectada / kit neutro), cai no placeholder genérico —
+// nenhum valor de seed pode aparecer no card.
 function displayName(handle: string): string {
-  return handle.replace(/^@/, '');
+  const h = handle.trim().replace(/^@/, '');
+  return h || 'Sua conta';
 }
 function atHandle(handle: string): string {
-  const h = handle.replace(/^@/, '');
-  return `@${h.toLowerCase()}`;
+  const h = handle.trim().replace(/^@/, '');
+  return h ? `@${h.toLowerCase()}` : '@suaconta';
 }
 
 // ---- estilos de texto do card ----
@@ -116,16 +119,13 @@ function header(nodes: SceneNode[], ctx: BuildCtx, prefix: string, page: number,
   const { tokens, metrics } = ctx;
   const ay = PAD;
 
-  // avatar: foto de perfil do canal conectado quando houver; senão, placeholder
-  // circular com o glifo da marca. ImageNode com radius = AVATAR/2 → círculo.
+  // avatar: foto de perfil do canal conectado quando houver; senão, círculo
+  // neutro (accentSoft, sem glifo). ImageNode com radius = AVATAR/2 → círculo.
   const avatarUrl = tokens.brand.avatarUrl;
   if (avatarUrl) {
     nodes.push({ type: 'image', id: nid(prefix, 'avatar'), z: 6, frame: { x: CX, y: ay, w: AVATAR, h: AVATAR }, src: avatarUrl, fit: 'cover', radius: AVATAR / 2 } satisfies ImageNode);
   } else {
     nodes.push({ type: 'ellipse', id: nid(prefix, 'avatar'), z: 6, frame: { x: CX, y: ay, w: AVATAR, h: AVATAR }, fill: tokens.color('accentSoft') } satisfies EllipseNode);
-    const glyph = st(tokens, 'accent', 400, AVATAR * 0.5, 'bg', { lh: 1 });
-    const gm = metrics.measure(tokens.brand.logoGlyph, glyph);
-    nodes.push({ type: 'glyphrun', id: nid(prefix, 'avatar.glyph'), z: 7, x: CX + AVATAR / 2 - gm.width / 2, baselineY: ay + AVATAR / 2 + gm.ascent / 2 - gm.descent / 2, text: tokens.brand.logoGlyph, style: glyph });
   }
 
   const tx = CX + AVATAR + 28;

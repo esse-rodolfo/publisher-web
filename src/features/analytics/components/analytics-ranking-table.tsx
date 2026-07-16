@@ -12,7 +12,7 @@ import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Skeleton } from '@/components/ui/skeleton'
 import { useRanking } from '../hooks/use-ranking'
-import { PERSONA_COLORS } from '@/lib/constants'
+import { usePersonaLookup } from '@/features/personas/hooks/use-personas'
 import { ChevronLeft, ChevronRight } from 'lucide-react'
 import { useState } from 'react'
 import { cn } from '@/lib/utils'
@@ -27,6 +27,7 @@ interface AnalyticsRankingTableProps {
 
 export function AnalyticsRankingTable({ period }: AnalyticsRankingTableProps) {
   const [page, setPage] = useState(1)
+  const { lookup: personaLookup } = usePersonaLookup()
   const { data, isLoading } = useRanking(page, period)
 
   if (isLoading || !data) {
@@ -65,7 +66,7 @@ export function AnalyticsRankingTable({ period }: AnalyticsRankingTableProps) {
           </TableHeader>
           <TableBody>
             {data.data.map((item, index) => {
-              const colors = PERSONA_COLORS[item.persona]
+              const colors = personaLookup(item.persona)
               const position = (page - 1) * data.pageSize + index + 1
 
               return (
@@ -83,8 +84,8 @@ export function AnalyticsRankingTable({ period }: AnalyticsRankingTableProps) {
                           'inline-flex shrink-0 items-center rounded-full px-2 py-0.5 text-xs font-medium',
                         )}
                         style={{
-                          backgroundColor: colors.soft,
-                          color: colors.accent,
+                          backgroundColor: colors.softHex,
+                          color: colors.accentHex,
                         }}
                       >
                         {item.persona}

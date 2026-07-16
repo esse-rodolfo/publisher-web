@@ -88,6 +88,8 @@ export interface ContentText {
   persona?: string;
   labelTopoCapa?: string;
   labelCapa?: string;
+  /** tags curtas da capa (render junta com " · " em MAIÚSCULAS); ausente → linha omitida. */
+  tagsCapa?: string[];
   hookCapa: string;
   slides: SlideText[];
   ctaLabelTopo?: string;

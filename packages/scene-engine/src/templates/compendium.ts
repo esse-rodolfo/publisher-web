@@ -1,8 +1,9 @@
 /**
  * Template "compendium" — port de backend/render/template-engine.ts (+CSS),
- * família "terminal box": capa com asterisco gigante, corpo com headline serif
- * + caixa terminal escura de linhas, CTA com square-mark. Emite SceneNode[] no
- * design space 1080². Texto via tokens/papéis (sem hex literal).
+ * família "terminal box": capa serif centralizada, corpo com headline serif
+ * + caixa terminal escura de linhas, CTA de caps + fio accent + call.
+ * Emite SceneNode[] no design space 1080². Texto via tokens/papéis (sem hex
+ * literal e sem strings de marca hardcoded).
  */
 import type { ContentText, SlideText } from '../doc.js';
 import { nid, slidePrefix } from '../ids.js';
@@ -136,23 +137,13 @@ function buildCover(content: ContentText, total: number, ctx: BuildCtx): RawSlid
   const PAD = 96;
   const CW = W - 2 * PAD;
 
-  // asterisco gigante decorativo (bottom-left)
-  const astStyle = st(tokens, 'accent', 400, 340, 'accent', { lh: 1 });
-  nodes.push({ type: 'glyphrun', id: nid(prefix, 'decoration.asterisk'), z: 0, opacity: 0.18, x: -40, baselineY: H + 40, text: tokens.brand.logoGlyph, style: astStyle });
-
   pageNo(nodes, ctx, prefix, 1, total);
 
-  const titleRuns: StyledRun[] = [{ text: `${tokens.brand.logoGlyph} `, key: 'em' }, ...parseInline(content.hookCapa)];
+  const titleRuns: StyledRun[] = parseInline(content.hookCapa);
   const tb = fitBlock(spec(titleRuns, CW, typed(ctx, nid(prefix, 'hook'), titleStyleOf(tokens, 108)), 'center'), metrics, 620, 0.6);
 
-  const authorStyle = st(tokens, 'accent', 400, 26, 'ink', { italic: true });
-  const ab = layoutBlock(spec([{ text: tokens.brand.handle, key: 'ink' }], CW, () => authorStyle, 'center'), metrics);
-
-  const gap = 80;
-  const totalH = tb.height + gap + ab.height;
-  let y = (H - totalH) / 2;
-  y += pushBlock(nodes, prefix, 'hook', tb, PAD, y, 10) + gap;
-  pushBlock(nodes, prefix, 'author', ab, PAD, y, 10);
+  const y = (H - tb.height) / 2;
+  pushBlock(nodes, prefix, 'hook', tb, PAD, y, 10);
 
   return { role: 'cover', sourceIndex: 0, background: tokens.color('cardBg'), nodes };
 }
@@ -168,17 +159,14 @@ function buildBody(slide: SlideText, sourceIndex: number, page: number, total: n
 
   pageNo(nodes, ctx, prefix, page, total);
 
-  // author-top
-  const authorStyle = st(tokens, 'accent', 400, 24, 'ink', { italic: true });
-  const ab = layoutBlock(spec([{ text: tokens.brand.handle, key: 'ink' }], CW, () => authorStyle, 'center'), metrics);
-  let cursor = PAD + 4;
-  cursor += pushBlock(nodes, prefix, 'author', ab, CX, cursor, 10) + 48;
+  // respiro no topo (sem o author-top, a headline não cola no topo do card)
+  let cursor = PAD + 80;
 
-  // headline (serif itálico) + asterisco
+  // headline (serif itálico)
   const labelTopo = slide.labelTopo ?? '';
   const after = labelTopo.includes('—') ? labelTopo.split('—')[1]?.trim() ?? '' : '';
   const headlineText = capitalize(slide.tag ?? (after || 'Como funciona'));
-  const hlRuns: StyledRun[] = [{ text: `${headlineText} `, key: 'ink' }, { text: tokens.brand.logoGlyph, key: 'em' }];
+  const hlRuns: StyledRun[] = [{ text: headlineText, key: 'ink' }];
   const hb = fitBlock(spec(hlRuns, CW, typed(ctx, nid(prefix, 'headline'), headlineStyleOf(tokens, 88)), 'center'), metrics, 240, 0.6);
   cursor += pushBlock(nodes, prefix, 'headline', hb, CX, cursor, 10) + 24;
 
@@ -188,7 +176,6 @@ function buildBody(slide: SlideText, sourceIndex: number, page: number, total: n
 
   // ---- terminal box ----
   const footerBaseY = H - PAD - 6;
-  const footerStyle = st(tokens, 'mono', 500, 14, 'muted', { ls: 0.18 });
   const termTop = cursor;
   const termBottom = footerBaseY - 24 - 24;
   const termX = (W - 880) / 2;
@@ -215,9 +202,6 @@ function buildBody(slide: SlideText, sourceIndex: number, page: number, total: n
   nodes.push(rect(nid(prefix, 'term.send'), termX + termW - padIn - 42, ftY, 42, 42, tokens.color('accent'), { z: 7, radius: 21 }));
   centerGlyph(nodes, nid(prefix, 'term.send.icon'), '↑', st(tokens, 'body', 600, 22, 'termStrong'), termX + termW - padIn - 21, ftY + 28, metrics, 8);
 
-  // comp-footer
-  centerGlyph(nodes, nid(prefix, 'footer'), `${tokens.brand.breadcrumb} · ${tokens.brand.handle}`, footerStyle, W / 2, footerBaseY, metrics, 10);
-
   return { role: 'body', sourceIndex, background: tokens.color('cardBg'), nodes };
 }
 
@@ -232,36 +216,25 @@ function buildCta(content: ContentText, total: number, ctx: BuildCtx): RawSlide 
   pageNo(nodes, ctx, prefix, total, total);
 
   // mede tudo p/ centralizar verticalmente
-  const authorStyle = st(tokens, 'accent', 400, 24, 'ink', { italic: true });
-  const ab = layoutBlock(spec([{ text: tokens.brand.handle, key: 'ink' }], CW, () => authorStyle, 'center'), metrics);
-
   const headStyle = (k: StyleKey) => st(tokens, 'accent', 400, 64, 'ink', { lh: 1.16, ls: -0.01 });
   const capsRuns: StyledRun[] = [{ text: (content.ctaText || 'Tá na hora').replace(/<[^>]+>/g, '').toUpperCase(), key: 'ink' }];
   const cb = fitBlock(spec(capsRuns, CW, typed(ctx, nid(prefix, 'caps'), headStyle), 'center'), metrics, 320, 0.6);
 
-  const callRuns = parseInline(content.ctaSub || `Comenta <span class="keyword">${tokens.brand.ctaKeyword}</span> pra receber o link.`);
+  const callRuns = parseInline(content.ctaSub || 'Comenta pra receber o link.');
   const callStyleOf = (k: StyleKey): ResolvedTextStyle =>
     k === 'keyword' || k === 'code'
       ? st(tokens, 'mono', 600, 34 * 0.82, 'accent', { lh: 1.32 })
       : st(tokens, 'body', 700, 34, 'ink', { lh: 1.32, ls: -0.01 });
   const callb = layoutBlock(spec(callRuns, CW, typed(ctx, nid(prefix, 'call'), callStyleOf), 'center'), metrics);
 
-  const square = 96;
-  const gap1 = 24 + 3 + 56; // underline + margens
-  const gap2 = 40;
-  const gap3 = 48;
-  const totalH = ab.height + 48 + cb.height + gap1 + square + gap2 + callb.height;
+  const gap1 = 24 + 3 + 56; // caps→underline + fio + underline→call
+  const totalH = cb.height + gap1 + callb.height;
   let y = (H - totalH) / 2;
 
-  y += pushBlock(nodes, prefix, 'author', ab, PAD, y, 10) + 48;
   y += pushBlock(nodes, prefix, 'caps', cb, PAD, y, 10) + 24;
   nodes.push(rect(nid(prefix, 'underline'), (W - 160) / 2, y, 160, 3, tokens.color('accent'), { z: 5, radius: 2 }));
   y += 3 + 56;
-  nodes.push(rect(nid(prefix, 'square'), (W - square) / 2, y, square, square, tokens.color('accent'), { z: 5, radius: 14 }));
-  centerGlyph(nodes, nid(prefix, 'square.mark'), tokens.brand.logoGlyph, st(tokens, 'accent', 400, 56, 'termStrong'), W / 2, y + square / 2 + 20, metrics, 6);
-  y += square + gap2;
   pushBlock(nodes, prefix, 'call', callb, PAD, y, 10);
-  void gap3;
 
   return { role: 'cta', sourceIndex: 0, background: tokens.color('cardBg'), nodes };
 }

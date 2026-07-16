@@ -15,7 +15,8 @@ import { Checkbox } from '@/components/ui/checkbox'
 import { Button } from '@/components/ui/button'
 import { Skeleton } from '@/components/ui/skeleton'
 import { EmptyState } from '@/components/layout/empty-state'
-import { PERSONAS, PATTERNS } from '@/lib/constants'
+import { PATTERNS } from '@/lib/constants'
+import { usePersonaLookup } from '@/features/personas/hooks/use-personas'
 import { FileText, ChevronLeft, ChevronRight } from 'lucide-react'
 import { ContentStatusBadge } from './content-status-badge'
 import { ContentRowActions } from './content-row-actions'
@@ -33,10 +34,6 @@ function formatSlug(slug: string): string {
     .replace(/\b\w/g, (c) => c.toUpperCase())
 }
 
-function getPersonaLabel(persona: string): string {
-  return PERSONAS.find((p) => p.value === persona)?.label ?? persona
-}
-
 function getPatternLabel(pattern: string): string {
   const found = PATTERNS.find((p) => p.value === pattern)
   return found ? `${found.value} - ${found.label}` : pattern
@@ -44,6 +41,7 @@ function getPatternLabel(pattern: string): string {
 
 export function ContentTable() {
   const router = useRouter()
+  const { lookup: personaLookup } = usePersonaLookup()
   const [filters, setFilters] = useState<ContentFilterParams>({
     page: 1,
     pageSize: PAGE_SIZE,
@@ -194,7 +192,7 @@ export function ContentTable() {
                   <ContentStatusBadge status={content.status} />
                 </TableCell>
                 <TableCell className="text-sm text-gray-600 dark:text-gray-400">
-                  {getPersonaLabel(content.persona)}
+                  {personaLookup(content.persona).name}
                 </TableCell>
                 <TableCell className="text-sm text-gray-500 dark:text-gray-500">
                   {getPatternLabel(content.pattern)}

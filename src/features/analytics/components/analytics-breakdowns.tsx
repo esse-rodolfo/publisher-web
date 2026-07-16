@@ -5,7 +5,8 @@ import { Skeleton } from '@/components/ui/skeleton'
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs'
 import { useAnalytics } from '../hooks/use-analytics'
 import { BarList } from '@tremor/react'
-import { PERSONAS, PATTERNS, PLATFORMS } from '@/lib/constants'
+import { PATTERNS, PLATFORMS } from '@/lib/constants'
+import { usePersonas } from '@/features/personas/hooks/use-personas'
 
 interface AnalyticsBreakdownsProps {
   period: '30d' | '60d' | '90d'
@@ -13,6 +14,7 @@ interface AnalyticsBreakdownsProps {
 
 export function AnalyticsBreakdowns({ period }: AnalyticsBreakdownsProps) {
   const { data, isLoading } = useAnalytics(period)
+  const { personas } = usePersonas()
 
   if (isLoading || !data) {
     return (
@@ -27,10 +29,12 @@ export function AnalyticsBreakdowns({ period }: AnalyticsBreakdownsProps) {
     )
   }
 
-  const personaData = PERSONAS.map((p) => ({
-    name: p.label,
-    value: parseFloat((3 + Math.random() * 7).toFixed(2)),
-  })).sort((a, b) => b.value - a.value)
+  const personaData = personas
+    .map((p) => ({
+      name: p.name,
+      value: parseFloat((3 + Math.random() * 7).toFixed(2)),
+    }))
+    .sort((a, b) => b.value - a.value)
 
   const patternData = PATTERNS.map((p) => ({
     name: `Padrao ${p.value} - ${p.label}`,

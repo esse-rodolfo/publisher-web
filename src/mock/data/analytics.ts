@@ -1,4 +1,4 @@
-import type { AnalyticsSummary, RankingItem, DashboardSummary, DailyMetric, ContentTypeBreakdown } from '@/types/analytics'
+import type { RankingItem, DashboardSummary, DailyMetric, ContentTypeBreakdown } from '@/types/analytics'
 
 function generateDailyData(days: number): DailyMetric[] {
   const data: DailyMetric[] = []
@@ -48,34 +48,6 @@ function generateContentTypeBreakdown(totalPosts: number): ContentTypeBreakdown[
 }
 
 const dailyData30 = generateDailyData(30)
-
-export const mockAnalyticsSummary: AnalyticsSummary = {
-  totalPosts: 83,
-  avgEngagementRate: 6.42,
-  totalReach: 284000,
-  totalImpressions: 512000,
-  totalLikes: 38400,
-  totalComments: 12600,
-  totalShares: 4608,
-  totalSaves: 6912,
-  totalFollowersGained: dailyData30.reduce((sum, d) => sum + d.newFollowers, 0),
-  totalUnfollowers: dailyData30.reduce((sum, d) => sum + d.unfollowers, 0),
-  period: '30d',
-  dailyData: dailyData30,
-  contentTypeBreakdown: generateContentTypeBreakdown(83),
-  postsPerDay: generatePostsPerDay(30),
-  previousPeriod: {
-    avgEngagementRate: 5.8,
-    totalReach: 245000,
-    totalImpressions: 468000,
-    totalLikes: 32100,
-    totalComments: 10800,
-    totalShares: 3852,
-    totalSaves: 5778,
-    totalFollowersGained: 980,
-    totalUnfollowers: 180,
-  },
-}
 
 export const mockRanking: RankingItem[] = [
   { contentId: 'cnt_01', slug: '101-recuperacao-tributaria-dominio', persona: 'contador', pattern: 'A', publishedAt: '2026-05-02T20:55:00Z', analytics: { likes: 4640, comments: 3991, shares: 412, saves: 890, reach: 45000, impressions: 78000, engagementRate: 11.2 } },

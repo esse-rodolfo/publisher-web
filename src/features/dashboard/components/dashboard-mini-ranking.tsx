@@ -4,12 +4,13 @@ import Link from 'next/link'
 import { Card, CardHeader, CardTitle, CardContent, CardAction } from '@/components/ui/card'
 import { Skeleton } from '@/components/ui/skeleton'
 import { useDashboard } from '../hooks/use-dashboard'
-import { PERSONA_COLORS } from '@/lib/constants'
+import { usePersonaLookup } from '@/features/personas/hooks/use-personas'
 import { cn } from '@/lib/utils'
 import { Trophy, ArrowRight } from 'lucide-react'
 
 export function DashboardMiniRanking() {
   const { data, isLoading } = useDashboard()
+  const { lookup: personaLookup } = usePersonaLookup()
 
   if (isLoading || !data) {
     return (
@@ -55,7 +56,7 @@ export function DashboardMiniRanking() {
       <CardContent>
         <div className="divide-y divide-gray-100">
           {data.topPosts.slice(0, 5).map((post, index) => {
-            const colors = PERSONA_COLORS[post.persona]
+            const colors = personaLookup(post.persona)
             const isTopThree = index < 3
             const truncatedSlug =
               post.slug.length > 25
@@ -84,8 +85,8 @@ export function DashboardMiniRanking() {
                 <span
                   className="inline-flex shrink-0 items-center rounded-full px-2 py-0.5 text-[10px] font-medium"
                   style={{
-                    backgroundColor: colors.soft,
-                    color: colors.accent,
+                    backgroundColor: colors.softHex,
+                    color: colors.accentHex,
                   }}
                 >
                   {post.persona}

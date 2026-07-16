@@ -30,7 +30,7 @@ export function AnalyticsChart({ period }: AnalyticsChartProps) {
     )
   }
 
-  const chartData = data.dailyData.map((d) => ({
+  const chartData = data.dailyEngagement.map((d) => ({
     date: new Date(d.date).toLocaleDateString('pt-BR', {
       day: '2-digit',
       month: '2-digit',

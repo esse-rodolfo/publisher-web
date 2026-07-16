@@ -68,21 +68,22 @@ function corners(nodes, prefix, color) {
 function topbar(nodes, ctx, prefix, stepLabel, pageNo, color, accentColor) {
     const { tokens, metrics } = ctx;
     const baseY = PADY + 20;
-    const labelStyle = st(tokens, 'display', 600, 18, accentColor, { ls: 0.16 });
-    nodes.push({ type: 'glyphrun', id: nid(prefix, 'topbar.step'), z: 10, x: CX, baselineY: baseY, text: stepLabel.toUpperCase(), style: labelStyle });
+    // sem label (ex.: capa sem labelTopoCapa) o texto da esquerda não é desenhado
+    if (stepLabel) {
+        const labelStyle = st(tokens, 'display', 600, 18, accentColor, { ls: 0.16 });
+        nodes.push({ type: 'glyphrun', id: nid(prefix, 'topbar.step'), z: 10, x: CX, baselineY: baseY, text: stepLabel.toUpperCase(), style: labelStyle });
+    }
     if (ctx.settings?.showCounter === false)
         return;
     const pageStyle = st(tokens, 'mono', 600, 16, color, { ls: 0.06 });
     const pw = metrics.measure(pageNo, pageStyle).width;
     nodes.push({ type: 'glyphrun', id: nid(prefix, 'topbar.page'), z: 10, x: W - PADX - pw, baselineY: baseY, text: pageNo, style: pageStyle });
 }
-function footer(nodes, ctx, prefix, handleRight, lineColor, textColor, handleColor) {
+function footer(nodes, ctx, prefix, handleRight, lineColor, handleColor) {
     const { tokens, metrics } = ctx;
     const lineY = H - PADY - 52;
     nodes.push(rect(nid(prefix, 'footer.line'), CX, lineY, CW, 1, tokens.color(lineColor), { z: 5 }));
     const baseY = H - PADY - 14;
-    const left = st(tokens, 'mono', 500, 15, textColor, { ls: 0.12 });
-    nodes.push({ type: 'glyphrun', id: nid(prefix, 'footer.brand'), z: 10, x: CX, baselineY: baseY, text: `${tokens.brand.handle} · ${tokens.brand.breadcrumb}`, style: left });
     const right = st(tokens, 'mono', 600, 15, handleColor, { ls: 0.12 });
     const rw = metrics.measure(handleRight, right).width;
     nodes.push({ type: 'glyphrun', id: nid(prefix, 'footer.handle'), z: 10, x: W - PADX - rw, baselineY: baseY, text: handleRight, style: right });
@@ -226,7 +227,7 @@ function buildBody(slide, sourceIndex, page, totalPages, ctx) {
         const cb = layoutBlock(spec(parseInline(slide.callout), CW - 64, typed(ctx, nid(prefix, 'callout.text'), bodyStyleOf(tokens, 28))), metrics);
         pushBlock(nodes, prefix, 'callout.text', cb, CX + 32, cy + 28, 10);
     }
-    footer(nodes, ctx, prefix, 'ARRASTA →', 'line', 'muted', 'ink');
+    footer(nodes, ctx, prefix, 'ARRASTA →', 'line', 'ink');
     return { role: 'body', sourceIndex, background: tokens.color('bg'), nodes };
 }
 // ---------------- COVER ----------------
@@ -235,26 +236,29 @@ function buildCover(content, totalPages, ctx) {
     const prefix = slidePrefix('cover', 0);
     const nodes = [];
     corners(nodes, prefix, tokens.color('ink'));
-    topbar(nodes, ctx, prefix, content.labelTopoCapa || tokens.brand.breadcrumb, `01 / ${String(totalPages).padStart(2, '0')}`, 'ink', 'accent');
+    topbar(nodes, ctx, prefix, content.labelTopoCapa || '', `01 / ${String(totalPages).padStart(2, '0')}`, 'ink', 'accent');
     let cursor = PADY + 22 + 56;
     if (content.labelCapa) {
         const ls = st(tokens, 'display', 600, 20, 'accent', { ls: 0.18 });
         const b = layoutBlock(spec([{ text: content.labelCapa.toUpperCase(), key: 'ink' }], CW, () => ls), metrics);
-        cursor += pushBlock(nodes, prefix, 'label', b, CX, cursor, 10) + 32;
+        // gap maior que o dos bodies (32→48): respiro intencional sem o glifo decorativo
+        cursor += pushBlock(nodes, prefix, 'label', b, CX, cursor, 10) + 48;
     }
-    // asterisco
-    const ast = st(tokens, 'accent', 400, 96, 'accent', { lh: 1 });
-    const ab = layoutBlock(spec([{ text: tokens.brand.logoGlyph, key: 'ink' }], CW, () => ast), metrics);
-    cursor += pushBlock(nodes, prefix, 'asterisk', ab, CX, cursor, 10) + 24;
     const hlRuns = parseInline(content.hookCapa);
     const hb = fitBlock(spec(hlRuns, CW, typed(ctx, nid(prefix, 'hook'), headlineStyleOf(tokens, 78, 'ink'))), metrics, 460, 0.7);
     cursor += pushBlock(nodes, prefix, 'hook', hb, CX, cursor, 10) + 36;
     nodes.push(rect(nid(prefix, 'underline'), CX, cursor, 96, 4, tokens.color('accent'), { z: 5, radius: 2 }));
-    // footer-tags (acima do footer)
-    const tags = st(tokens, 'display', 600, 18, 'accent', { ls: 0.16 });
-    const tb = layoutBlock(spec([{ text: '5 PASSOS · TÉCNICO · SEM CÓDIGO', key: 'ink' }], CW, () => tags), metrics);
-    pushBlock(nodes, prefix, 'footertags', tb, CX, H - PADY - 52 - 40, 10);
-    footer(nodes, ctx, prefix, 'ARRASTA →', 'line', 'muted', 'ink');
+    // footer-tags (acima do footer) — vem do conteúdo; sem tags a linha é omitida
+    // (fica acima do footer, então a omissão não desloca nada).
+    // contrato "2-4 tags": o schema do backend trunca em 4; o render espelha o teto
+    // pra evitar quebra em segunda linha colidindo com o footer (Y fixo).
+    const tagItems = (content.tagsCapa ?? []).map((t) => t.trim()).filter(Boolean).slice(0, 4);
+    if (tagItems.length) {
+        const tags = st(tokens, 'display', 600, 18, 'accent', { ls: 0.16 });
+        const tb = layoutBlock(spec([{ text: tagItems.join(' · ').toUpperCase(), key: 'ink' }], CW, () => tags), metrics);
+        pushBlock(nodes, prefix, 'footertags', tb, CX, H - PADY - 52 - 40, 10);
+    }
+    footer(nodes, ctx, prefix, 'ARRASTA →', 'line', 'ink');
     return { role: 'cover', sourceIndex: 0, background: tokens.color('bg'), nodes };
 }
 // ---------------- CTA ----------------
@@ -267,10 +271,8 @@ function buildCta(content, totalPages, ctx) {
     let cursor = PADY + 22 + 56;
     const label = st(tokens, 'display', 600, 18, 'bg', { ls: 0.18 });
     const lb = layoutBlock(spec([{ text: (content.ctaLabel || 'leva 2 minutos pra colar').toUpperCase(), key: 'ink' }], CW, () => label), metrics);
-    cursor += pushBlock(nodes, prefix, 'label', lb, CX, cursor, 10) + 32;
-    const ast = st(tokens, 'accent', 400, 80, 'bg', { lh: 1 });
-    const ab = layoutBlock(spec([{ text: tokens.brand.logoGlyph, key: 'ink' }], CW, () => ast), metrics);
-    cursor += pushBlock(nodes, prefix, 'asterisk', ab, CX, cursor, 10) + 20;
+    // gap 32→48: respiro intencional sem o glifo decorativo entre label e texto
+    cursor += pushBlock(nodes, prefix, 'label', lb, CX, cursor, 10) + 48;
     const ctaStyleOf = (k) => {
         if (k === 'em')
             return st(tokens, 'accent', 400, 62 * 0.96, 'bg', { italic: true, lh: 1.08 });
@@ -287,7 +289,7 @@ function buildCta(content, totalPages, ctx) {
         const sb = layoutBlock(spec([{ text: content.ctaSub, key: 'ink' }], CW, typed(ctx, nid(prefix, 'sub'), () => sub)), metrics);
         pushBlock(nodes, prefix, 'sub', sb, CX, cursor, 10);
     }
-    footer(nodes, ctx, prefix, '👇 COMENTA AÍ', 'bg', 'bg', 'bg');
+    footer(nodes, ctx, prefix, '👇 COMENTA AÍ', 'bg', 'bg');
     return { role: 'cta', sourceIndex: 0, background: tokens.color('accent'), nodes };
 }
 export const stepTemplate = {

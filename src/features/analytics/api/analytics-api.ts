@@ -1,11 +1,11 @@
 import { api } from '@/lib/api-client'
-import type { AnalyticsSummary, RankingItem } from '@/types/analytics'
+import type { DashboardSummary, RankingItem } from '@/types/analytics'
 import type { PaginatedResponse } from '@/types/api'
 
 export async function getAnalyticsSummary(
   period: '30d' | '60d' | '90d' = '30d',
-): Promise<AnalyticsSummary> {
-  const { data } = await api.get<AnalyticsSummary>('/analytics/summary', {
+): Promise<DashboardSummary> {
+  const { data } = await api.get<DashboardSummary>('/analytics/dashboard', {
     params: { period },
   })
   return data

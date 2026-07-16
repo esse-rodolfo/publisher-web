@@ -6,8 +6,9 @@ import { cn } from '@/lib/utils'
 import { PageHeader } from '@/components/layout/page-header'
 
 const tabs = [
-  { href: '/settings/canais', label: 'Canais' },
-  { href: '/settings/marca', label: 'Marca' },
+  { href: '/settings/channels', label: 'Canais' },
+  { href: '/settings/branding', label: 'Marca' },
+  { href: '/settings/personas', label: 'Personas' },
 ]
 
 export default function SettingsLayout({ children }: { children: React.ReactNode }) {

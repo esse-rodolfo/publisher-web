@@ -8,12 +8,24 @@ import { Card, CardContent } from '@/components/ui/card'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Badge } from '@/components/ui/badge'
 import { Separator } from '@/components/ui/separator'
-import { PERSONAS, PATTERNS, PERSONA_COLORS } from '@/lib/constants'
+import { PATTERNS } from '@/lib/constants'
+import { usePersonaLookup } from '@/features/personas/hooks/use-personas'
 import { api } from '@/lib/api-client'
 import type { Content } from '@/types/content'
 import { SYSTEM_TEMPLATES } from '@/features/templates/lib/system-templates'
+import type { CustomTemplate } from '@/features/templates/api/templates-api'
 import { mapApiContent } from '../../lib/content-mapper'
-import { useWizardStore } from './wizard-store'
+import { useWizardStore, type WizardTemplate } from './wizard-store'
+
+/** Rotulo do template escolhido no resumo (mesma resolucao usada no styleData). */
+function templateLabelFor(
+  template: WizardTemplate,
+  selectedCustom: CustomTemplate | null
+): string {
+  if (template === 'custom') return selectedCustom?.name ?? 'Automático'
+  if (template === 'auto') return 'Automático'
+  return SYSTEM_TEMPLATES.find((t) => t.family === template)?.name ?? 'Automático'
+}
 
 export function StepGenerate() {
   const persona = useWizardStore((s) => s.persona)
@@ -28,9 +40,10 @@ export function StepGenerate() {
   const [errorMessage, setErrorMessage] = useState('')
   const pollingRef = useRef<ReturnType<typeof setInterval> | null>(null)
 
-  const personaInfo = PERSONAS.find((p) => p.value === persona)
+  const { lookup: personaLookup } = usePersonaLookup()
+  const personaInfo = persona ? personaLookup(persona) : null
   const patternInfo = PATTERNS.find((p) => p.value === pattern)
-  const personaColors = persona ? PERSONA_COLORS[persona] : null
+  const templateLabel = templateLabelFor(template, selectedCustom)
 
   const stopPolling = useCallback(() => {
     if (pollingRef.current) {
@@ -53,17 +66,17 @@ export function StepGenerate() {
             stopPolling()
             setGeneratedContent(data)
             setStatus('idle')
-            toast.success('Conteudo gerado com sucesso!')
+            toast.success('Conteúdo gerado com sucesso!')
             nextStep()
           } else if (data.status === 'FAILED') {
             stopPolling()
             setStatus('error')
-            setErrorMessage('A geracao falhou. Tente novamente.')
+            setErrorMessage('A geração falhou. Tente novamente.')
           }
         } catch {
           stopPolling()
           setStatus('error')
-          setErrorMessage('Erro ao verificar status da geracao.')
+          setErrorMessage('Erro ao verificar status da geração.')
         }
       }, 3000)
     },
@@ -95,53 +108,54 @@ export function StepGenerate() {
       if (data.status === 'READY') {
         setGeneratedContent(data)
         setStatus('idle')
-        toast.success('Conteudo gerado com sucesso!')
+        toast.success('Conteúdo gerado com sucesso!')
         nextStep()
       } else if (data.status === 'FAILED') {
         setStatus('error')
-        setErrorMessage('A geracao falhou. Tente novamente.')
+        setErrorMessage('A geração falhou. Tente novamente.')
       } else {
         pollContentStatus(data.id)
       }
     } catch {
       setStatus('error')
-      setErrorMessage('Erro ao iniciar a geracao. Tente novamente.')
+      setErrorMessage('Erro ao iniciar a geração. Tente novamente.')
     }
   }
 
   return (
     <div className="space-y-6">
       <div>
-        <h2 className="text-lg font-semibold">Gerar conteudo</h2>
+        <h2 className="text-lg font-semibold">Gerar conteúdo</h2>
         <p className="text-sm text-muted-foreground mt-1">
-          Revise suas escolhas e gere o conteudo com IA
+          Revise suas escolhas e gere o conteúdo com IA
         </p>
       </div>
 
       <Card>
         <CardContent className="space-y-4">
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+          {/* 4 itens: 2x2 em sm, linha unica em lg — evita o orfao que sobraria em 3 colunas */}
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
             <div className="space-y-1">
               <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
                 Persona
               </p>
-              {personaInfo && personaColors && (
+              {personaInfo && (
                 <Badge
                   variant="secondary"
                   className="text-sm"
                   style={{
-                    backgroundColor: personaColors.soft,
-                    color: personaColors.accent,
+                    backgroundColor: personaInfo.softHex,
+                    color: personaInfo.accentHex,
                   }}
                 >
-                  {personaInfo.label}
+                  {personaInfo.name}
                 </Badge>
               )}
             </div>
 
             <div className="space-y-1">
               <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
-                Padrao
+                Padrão
               </p>
               {patternInfo && (
                 <Badge variant="secondary" className="text-sm">
@@ -156,6 +170,15 @@ export function StepGenerate() {
               </p>
               <Badge variant="outline" className="text-sm">
                 Carrossel
+              </Badge>
+            </div>
+
+            <div className="space-y-1">
+              <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
+                Template
+              </p>
+              <Badge variant="secondary" className="max-w-full text-sm">
+                <span className="min-w-0 truncate">{templateLabel}</span>
               </Badge>
             </div>
           </div>
@@ -176,7 +199,7 @@ export function StepGenerate() {
           <CardContent className="space-y-4">
             <div className="flex items-center gap-3">
               <Loader2 className="size-5 animate-spin text-primary" />
-              <p className="text-sm font-medium">Gerando conteudo com IA...</p>
+              <p className="text-sm font-medium">Gerando conteúdo com IA...</p>
             </div>
             <div className="space-y-3">
               <Skeleton className="h-4 w-3/4" />

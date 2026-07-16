@@ -20,9 +20,10 @@ import { ChevronLeft, ChevronRight } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Skeleton } from '@/components/ui/skeleton'
 import { cn } from '@/lib/utils'
-import { STATUS_OPTIONS, PERSONA_COLORS } from '@/lib/constants'
+import { STATUS_OPTIONS } from '@/lib/constants'
+import { usePersonaLookup } from '@/features/personas/hooks/use-personas'
 import { useCalendarContents } from '../hooks/use-calendar'
-import type { Content, Persona } from '@/types/content'
+import type { Content } from '@/types/content'
 
 function getStatusDot(status: string) {
   const opt = STATUS_OPTIONS.find((s) => s.value === status)
@@ -50,6 +51,7 @@ export function CalendarView() {
   const router = useRouter()
   const [currentMonth, setCurrentMonth] = useState(new Date())
   const { data: contents, isLoading } = useCalendarContents()
+  const { lookup: personaLookup } = usePersonaLookup()
 
   const contentsByDate = useMemo(() => {
     if (!contents) return new Map<string, Content[]>()
@@ -151,8 +153,8 @@ export function CalendarView() {
                           'flex items-center gap-1',
                         )}
                         style={{
-                          backgroundColor: PERSONA_COLORS[content.persona as Persona]?.soft || '#F5F2EE',
-                          color: PERSONA_COLORS[content.persona as Persona]?.accent || '#141413',
+                          backgroundColor: personaLookup(content.persona).softHex,
+                          color: personaLookup(content.persona).accentHex,
                         }}
                       >
                         <span className={cn('h-1.5 w-1.5 rounded-full shrink-0', getStatusDot(content.status))} />

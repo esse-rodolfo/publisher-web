@@ -53,13 +53,14 @@ export function mapApiSlide(api: ApiSlide): Slide {
   }
 }
 
-type ApiContent = Omit<Content, 'slides' | 'labelTopoCapa' | 'labelCapa' | 'hookCapa' | 'ctaLabelTopo' | 'ctaLabel' | 'ctaText' | 'ctaSub'> & {
+type ApiContent = Omit<Content, 'slides' | 'labelTopoCapa' | 'labelCapa' | 'tagsCapa' | 'hookCapa' | 'ctaLabelTopo' | 'ctaLabel' | 'ctaText' | 'ctaSub'> & {
   slides?: ApiSlide[]
   slidesData?: Record<string, unknown> | null
   hookCapa?: string | null
   caption?: string | null
   labelTopoCapa?: string | null
   labelCapa?: string | null
+  tagsCapa?: string[] | null
   ctaLabelTopo?: string | null
   ctaLabel?: string | null
   ctaText?: string | null
@@ -79,6 +80,7 @@ export function mapApiContent(api: ApiContent): Content {
     ...(api as unknown as Content),
     labelTopoCapa: api.labelTopoCapa ?? (sd.label_topo_capa as string) ?? '',
     labelCapa: api.labelCapa ?? (sd.label_capa as string) ?? '',
+    tagsCapa: api.tagsCapa ?? (sd.tags_capa as string[]) ?? undefined,
     hookCapa: api.hookCapa ?? (sd.hook_capa as string) ?? '',
     ctaLabelTopo: api.ctaLabelTopo ?? (sd.cta_label_topo as string) ?? '',
     ctaLabel: api.ctaLabel ?? (sd.cta_label as string) ?? '',

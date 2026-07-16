@@ -28,36 +28,9 @@ export interface ContentTypeBreakdown {
   engagement: number
 }
 
-export interface AnalyticsSummary {
-  totalPosts: number
-  avgEngagementRate: number
-  totalReach: number
-  totalImpressions: number
-  totalLikes: number
-  totalComments: number
-  totalShares: number
-  totalSaves: number
-  totalFollowersGained: number
-  totalUnfollowers: number
-  period: '30d' | '60d' | '90d'
-  dailyData: DailyMetric[]
-  contentTypeBreakdown: ContentTypeBreakdown[]
-  postsPerDay: { date: string; count: number }[]
-  previousPeriod: {
-    avgEngagementRate: number
-    totalReach: number
-    totalImpressions: number
-    totalLikes: number
-    totalComments: number
-    totalShares: number
-    totalSaves: number
-    totalFollowersGained: number
-    totalUnfollowers: number
-  }
-}
-
 export interface RankingItem {
   contentId: string
+  publishTargetId?: string
   slug: string
   persona: Persona
   pattern: Pattern

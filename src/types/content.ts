@@ -1,6 +1,11 @@
 export type ContentStatus = 'DRAFT' | 'GENERATING' | 'READY' | 'SCHEDULED' | 'PUBLISHING' | 'PUBLISHED' | 'FAILED'
 export type ContentType = 'CAROUSEL' | 'POST' | 'REEL'
-export type Persona = 'contador' | 'advogado' | 'empresario' | 'arquiteto' | 'engenheiro' | 'agencia'
+/**
+ * Slug de uma persona do tenant. Era uma union fechada; as personas agora são
+ * criadas pelo user (model Persona no backend) — use `usePersonas()` pra listar
+ * e `usePersonaLookup()` pra resolver slug -> nome/cor.
+ */
+export type Persona = string
 export type Pattern = 'A' | 'B' | 'C' | 'D' | 'E' | 'F'
 
 export interface SlideCard {
@@ -66,6 +71,8 @@ export interface Content {
   templateSlug: string
   labelTopoCapa: string
   labelCapa: string
+  /** tags curtas da capa (2-4, MAIÚSCULAS); conteúdo antigo não tem → linha omitida. */
+  tagsCapa?: string[]
   hookCapa: string
   slides: Slide[]
   ctaLabelTopo: string

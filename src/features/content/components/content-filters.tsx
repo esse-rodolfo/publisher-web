@@ -9,7 +9,8 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { Button } from '@/components/ui/button'
-import { STATUS_OPTIONS, CONTENT_TYPES, PERSONAS, PLATFORMS } from '@/lib/constants'
+import { STATUS_OPTIONS, CONTENT_TYPES, PLATFORMS } from '@/lib/constants'
+import { usePersonas } from '@/features/personas/hooks/use-personas'
 import { Search, X } from 'lucide-react'
 import type { ContentFilterParams } from '../types/content-filters'
 import type { ContentStatus, ContentType, Persona } from '@/types/content'
@@ -21,6 +22,9 @@ interface ContentFiltersProps {
 }
 
 export function ContentFilters({ filters, onFiltersChange }: ContentFiltersProps) {
+  // inclui arquivadas: conteúdo antigo delas continua existindo e filtrável
+  const { personas } = usePersonas(true)
+
   const hasActiveFilters =
     filters.status || filters.contentType || filters.persona || filters.platform || filters.search
 
@@ -91,9 +95,9 @@ export function ContentFilters({ filters, onFiltersChange }: ContentFiltersProps
           <SelectValue placeholder="Persona" />
         </SelectTrigger>
         <SelectContent>
-          {PERSONAS.map((opt) => (
-            <SelectItem key={opt.value} value={opt.value}>
-              {opt.label}
+          {personas.map((opt) => (
+            <SelectItem key={opt.id} value={opt.slug}>
+              {opt.name}
             </SelectItem>
           ))}
         </SelectContent>

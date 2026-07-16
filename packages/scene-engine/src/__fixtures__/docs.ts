@@ -13,6 +13,7 @@ export const EDITORIAL_DOC: DesignDocument = {
     persona: 'contador',
     labelTopoCapa: 'CLAUDE CODE BR',
     labelCapa: 'O ERRO DE R$ 30 MIL/ANO',
+    tagsCapa: ['5 PASSOS', 'TÉCNICO', 'SEM CÓDIGO'],
     hookCapa: 'Todo mês some dinheiro no <em>lugar errado</em>',
     slides: [
       {

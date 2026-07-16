@@ -6,11 +6,12 @@ import { useWizardStore } from './wizard-store'
 
 const STEPS = [
   { number: 1, label: 'Persona' },
-  { number: 2, label: 'Padrao' },
+  { number: 2, label: 'Padrão' },
   { number: 3, label: 'Tema' },
-  { number: 4, label: 'Gerar' },
-  { number: 5, label: 'Preview' },
-  { number: 6, label: 'Agendar' },
+  { number: 4, label: 'Template' },
+  { number: 5, label: 'Gerar' },
+  { number: 6, label: 'Preview' },
+  { number: 7, label: 'Agendar' },
 ]
 
 function canAdvanceFrom(
@@ -30,8 +31,11 @@ function canAdvanceFrom(
     case 3:
       return state.theme.trim().length > 0
     case 4:
-      return state.generatedContent !== null
+      // template tem default 'auto': sempre pode avançar
+      return true
     case 5:
+      return state.generatedContent !== null
+    case 6:
       return state.generatedContent !== null
     default:
       return false
@@ -54,7 +58,7 @@ export function WizardStepper() {
   })
 
   return (
-    <nav aria-label="Progresso do wizard" className="w-full">
+    <nav aria-label="Progresso do wizard" className="w-full overflow-x-auto">
       <ol className="flex items-center justify-between">
         {STEPS.map((step, index) => {
           const isActive = step.number === currentStep
@@ -80,7 +84,7 @@ export function WizardStepper() {
                       'border-primary bg-primary/10 text-primary',
                     !isActive &&
                       !isCompleted &&
-                      'border-muted-foreground/30 text-muted-foreground/50',
+                      'border-muted-foreground/80 text-muted-foreground',
                     isClickable
                       ? 'cursor-pointer hover:scale-110'
                       : 'cursor-not-allowed',
@@ -94,11 +98,14 @@ export function WizardStepper() {
                   )}
                 </button>
                 <span
+                  aria-hidden="true"
                   className={cn(
-                    'text-xs font-medium transition-colors duration-300',
+                    // 7 itens não cabem com label abaixo de sm: o botão já expõe
+                    // o label via aria-label, então some só o texto visível.
+                    'hidden text-xs font-medium transition-colors duration-300 sm:inline',
                     isActive && 'text-foreground',
                     isCompleted && 'text-primary',
-                    !isActive && !isCompleted && 'text-muted-foreground/50'
+                    !isActive && !isCompleted && 'text-muted-foreground'
                   )}
                 >
                   {step.label}
@@ -107,7 +114,9 @@ export function WizardStepper() {
               {index < STEPS.length - 1 && (
                 <div
                   className={cn(
-                    'mx-2 mb-6 h-px flex-1 transition-colors duration-300',
+                    // mb-6 compensa a altura do label p/ alinhar a linha ao centro
+                    // do círculo; sem label (abaixo de sm) o offset não se aplica.
+                    'mx-2 h-px flex-1 transition-colors duration-300 sm:mb-6',
                     step.number < currentStep
                       ? 'bg-primary'
                       : 'bg-muted-foreground/20'

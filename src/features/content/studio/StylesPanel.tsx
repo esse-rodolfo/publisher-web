@@ -56,7 +56,14 @@ function PresetCard({ preset, kit, metrics, active, onApply, onDelete }: { prese
     try {
       const doc = contentToDoc(DEMO_CONTENT)
       doc.content = { ...doc.content, template: preset.template }
-      const slide = resolveScene(doc, metrics, sanitizeKit(presetToKit(preset, kit))).slides[0]
+      // preview não tem conta IG injetada: no card "tweet", neutraliza a
+      // identidade do kit (placeholder genérico em vez do handle do tenant)
+      const baseKit = sanitizeKit(presetToKit(preset, kit))
+      const previewKit =
+        preset.template === 'tweet'
+          ? { ...baseKit, brand: { ...baseKit.brand, handle: '', avatarUrl: undefined } }
+          : baseKit
+      const slide = resolveScene(doc, metrics, previewKit).slides[0]
       if (slide) paintToCanvas(ref.current, slide, metrics, CARD / 1080)
     } catch {
       /* preview é cosmético */

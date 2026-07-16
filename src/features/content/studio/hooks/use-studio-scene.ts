@@ -121,20 +121,24 @@ export function useStudioScene(content: Content): StudioScene {
       ]),
     )
     // identidade do canal conectado no card "tweet" (avatar + @handle); demais
-    // templates mantêm o handle da marca. Sem canal → placeholder do brand kit.
+    // templates mantêm o kit como está. Sem canal IG, a identidade do kit é
+    // NEUTRALIZADA (handle vazio, sem avatar) → o template cai no placeholder
+    // genérico ("Sua conta" / "@suaconta"), nunca no valor do seed.
     const safeKit = sanitizeKit(kit)
     const sceneKit =
-      baseDoc.content.template === 'tweet' && igAccount
-        ? {
-            ...safeKit,
-            brand: {
-              ...safeKit.brand,
-              handle: igAccount.accountName.startsWith('@')
-                ? igAccount.accountName
-                : `@${igAccount.accountName}`,
-              avatarUrl: igAccount.avatarUrl ?? safeKit.brand.avatarUrl,
-            },
-          }
+      baseDoc.content.template === 'tweet'
+        ? igAccount
+          ? {
+              ...safeKit,
+              brand: {
+                ...safeKit.brand,
+                handle: igAccount.accountName.startsWith('@')
+                  ? igAccount.accountName
+                  : `@${igAccount.accountName}`,
+                avatarUrl: igAccount.avatarUrl ?? safeKit.brand.avatarUrl,
+              },
+            }
+          : { ...safeKit, brand: { ...safeKit.brand, handle: '', avatarUrl: undefined } }
         : safeKit
     return resolveScene({ ...baseDoc, layout: style?.layout, settings: style?.settings, overrides: safeOverrides, added: safeAdded }, metrics, sceneKit)
   }, [metrics, baseDoc, overrides, added, kit, style, igAccount])

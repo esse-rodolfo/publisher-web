@@ -56,6 +56,9 @@ export type RawCarousel = {
   persona?: string
   label_topo_capa?: string
   label_capa?: string
+  /** tags curtas da capa — snake no JSON da geração; camel aceito por retrocompat de draft. */
+  tags_capa?: string[]
+  tagsCapa?: string[]
   hook_capa?: string
   slides?: RawSlide[]
   cta_label_topo?: string
@@ -116,6 +119,7 @@ function buildContentText(content: Content): ContentText {
       persona: raw.persona ?? content.persona,
       labelTopoCapa: raw.label_topo_capa ?? content.labelTopoCapa,
       labelCapa: raw.label_capa ?? content.labelCapa,
+      tagsCapa: raw.tags_capa ?? raw.tagsCapa ?? content.tagsCapa,
       hookCapa: raw.hook_capa ?? content.hookCapa ?? '',
       slides: raw.slides.map(mapSlide),
       ctaLabelTopo: raw.cta_label_topo ?? content.ctaLabelTopo,
@@ -136,6 +140,7 @@ function buildContentText(content: Content): ContentText {
     persona: content.persona,
     labelTopoCapa: content.labelTopoCapa,
     labelCapa: content.labelCapa,
+    tagsCapa: content.tagsCapa,
     hookCapa: content.hookCapa ?? '',
     slides: body.map((s) => ({
       labelTopo: s.labelTopo,
@@ -184,6 +189,7 @@ export function contentTextFromRaw(raw: RawCarousel): ContentText {
     persona: raw.persona,
     labelTopoCapa: raw.label_topo_capa,
     labelCapa: raw.label_capa,
+    tagsCapa: raw.tags_capa ?? raw.tagsCapa,
     hookCapa: raw.hook_capa ?? '',
     slides: (raw.slides ?? []).map(mapSlide),
     ctaLabelTopo: raw.cta_label_topo,

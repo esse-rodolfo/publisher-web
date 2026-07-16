@@ -1,25 +1,20 @@
 'use client'
 
 /**
- * Settings → Marca (RFC §13.4): edita o Brand Kit do tenant — paleta, strings
- * e tipografia por papel (famílias bundled; catálogo Google Fonts no próximo
- * incremento). Preview ao vivo: a capa-exemplo re-renderiza pelo MESMO engine
- * a cada mudança. Salvar versiona o kit (posts antigos não refluem).
+ * Settings → Marca (RFC §13.4): edita o Brand Kit do tenant — paleta e
+ * tipografia por papel (famílias bundled + catálogo Google Fonts).
+ * Salvar versiona o kit (posts antigos não refluem).
  */
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { toast } from 'sonner'
 import { Loader2, RotateCcw, Save } from 'lucide-react'
-import { resolveScene, type BrandKit, type MetricsProvider } from '@publisher/scene-engine'
+import type { BrandKit } from '@publisher/scene-engine'
 import { Button } from '@/components/ui/button'
 import { Skeleton } from '@/components/ui/skeleton'
 import { updateBrandKit, resetBrandKit } from './api/brand-kit-api'
 import { searchFonts, ensureFont, type CatalogEntry } from './api/fonts-api'
 import { useBrandKit } from './hooks/use-brand-kit'
-import { ensureStudioFonts, sanitizeKit } from './lib/browser-metrics'
-import { paintToCanvas } from './lib/paint-canvas'
-import { contentToDoc } from './lib/content-to-doc'
-import { DEMO_CONTENT } from './demo-content'
 
 /** Famílias embarcadas (mesmos bytes no server, sem download). */
 const BUNDLED: Array<{ family: string; weights: number[]; style: 'normal' | 'italic' }> = [
@@ -48,46 +43,15 @@ const PALETTE_FIELDS: Array<{ token: keyof BrandKit['palette']; label: string }>
   { token: 'line', label: 'Linha' },
 ]
 
-const BRAND_FIELDS: Array<{ key: keyof BrandKit['brand']; label: string }> = [
-  { key: 'handle', label: 'Handle (@)' },
-  { key: 'breadcrumb', label: 'Breadcrumb do topo' },
-  { key: 'ctaKeyword', label: 'Palavra do CTA' },
-  { key: 'logoGlyph', label: 'Glifo da marca' },
-]
-
 export function BrandKitEditor() {
   const qc = useQueryClient()
   const { kit: saved, isLoading } = useBrandKit()
   const [draft, setDraft] = useState<BrandKit | null>(null)
-  const [metrics, setMetrics] = useState<MetricsProvider | null>(null)
-  const canvasRef = useRef<HTMLCanvasElement>(null)
 
   // inicializa o draft quando o kit chega/atualiza
   useEffect(() => {
     setDraft(JSON.parse(JSON.stringify(saved)))
   }, [saved])
-
-  // carrega seed + famílias Google do draft; re-roda quando as famílias mudam
-  const draftFamilies = draft ? Object.values(draft.typography).map((r) => `${r.source}:${r.family}`).join('|') : ''
-  useEffect(() => {
-    if (!draft) return
-    ensureStudioFonts(draft).then(setMetrics).catch(() => setMetrics(null))
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [draftFamilies])
-
-  // preview ao vivo: capa demo com o kit em edição (fonte não carregada degrada pro seed)
-  const previewSlide = useMemo(() => {
-    if (!metrics || !draft) return null
-    try {
-      return resolveScene(contentToDoc(DEMO_CONTENT), metrics, sanitizeKit(draft)).slides[0] ?? null
-    } catch {
-      return null
-    }
-  }, [metrics, draft])
-
-  useEffect(() => {
-    if (canvasRef.current && previewSlide && metrics) paintToCanvas(canvasRef.current, previewSlide, metrics, 840 / 1080)
-  }, [previewSlide, metrics])
 
   const saveMutation = useMutation({
     mutationFn: () => updateBrandKit({ typography: draft!.typography, palette: draft!.palette, brand: draft!.brand }),
@@ -107,13 +71,11 @@ export function BrandKitEditor() {
   })
 
   if (isLoading || !draft) {
-    return <Skeleton className="h-96 w-full rounded-xl" />
+    return <Skeleton className="h-96 w-full max-w-3xl rounded-xl" />
   }
 
   const setPalette = (token: keyof BrandKit['palette'], hex: string) =>
     setDraft({ ...draft, palette: { ...draft.palette, [token]: hex } })
-  const setBrand = (key: keyof BrandKit['brand'], value: string) =>
-    setDraft({ ...draft, brand: { ...draft.brand, [key]: value } })
 
   /** escolhe família pra um papel: bundled direto; Google → ensure no servidor. */
   async function setRole(role: keyof BrandKit['typography'], family: string) {
@@ -142,92 +104,60 @@ export function BrandKitEditor() {
   }
 
   return (
-    <div className="grid gap-8 lg:grid-cols-[1fr_420px]">
-      <div className="space-y-8">
-        {/* Tipografia */}
-        <section>
-          <h3 className="mb-3 text-sm font-semibold">Tipografia</h3>
-          <div className="grid gap-3 sm:grid-cols-2">
-            {ROLES.map(({ role, label, hint }) => (
-              <FontRolePicker
-                key={role}
-                label={label}
-                hint={hint}
-                value={draft.typography[role].family}
-                onPick={(family) => setRole(role, family)}
-              />
-            ))}
-          </div>
-          <p className="mt-2 text-[11px] text-muted-foreground">
-            Embarcadas + catálogo do Google Fonts (baixadas e cacheadas — mesma renderização no post final).
-          </p>
-        </section>
-
-        {/* Paleta */}
-        <section>
-          <h3 className="mb-3 text-sm font-semibold">Paleta</h3>
-          <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
-            {PALETTE_FIELDS.map(({ token, label }) => (
-              <label key={token} className="flex items-center gap-2 rounded-md border border-border p-2">
-                <input
-                  type="color"
-                  value={draft.palette[token]}
-                  onChange={(e) => setPalette(token, e.target.value)}
-                  className="h-8 w-8 shrink-0 cursor-pointer rounded border-0 bg-transparent p-0"
-                />
-                <span className="min-w-0">
-                  <span className="block truncate text-xs font-medium">{label}</span>
-                  <span className="block text-[10px] uppercase text-muted-foreground">{draft.palette[token]}</span>
-                </span>
-              </label>
-            ))}
-          </div>
-        </section>
-
-        {/* Strings da marca */}
-        <section>
-          <h3 className="mb-3 text-sm font-semibold">Textos da marca</h3>
-          <div className="grid gap-3 sm:grid-cols-2">
-            {BRAND_FIELDS.map(({ key, label }) => (
-              <label key={key} className="block">
-                <span className="mb-1 block text-xs font-medium">{label}</span>
-                <input
-                  className="w-full rounded-md border border-input bg-background px-2 py-1.5 text-sm"
-                  value={draft.brand[key] ?? ''}
-                  onChange={(e) => setBrand(key, e.target.value)}
-                />
-              </label>
-            ))}
-          </div>
-        </section>
-
-        <div className="flex gap-2">
-          <Button onClick={() => saveMutation.mutate()} disabled={saveMutation.isPending}>
-            {saveMutation.isPending ? <Loader2 className="size-3.5 animate-spin" data-icon="inline-start" /> : <Save className="size-3.5" data-icon="inline-start" />}
-            Salvar marca
-          </Button>
-          <Button variant="outline" onClick={() => resetMutation.mutate()} disabled={resetMutation.isPending}>
-            <RotateCcw className="size-3.5" data-icon="inline-start" />
-            Restaurar padrão
-          </Button>
+    <div className="max-w-3xl space-y-8">
+      {/* Tipografia */}
+      <section>
+        <h3 className="mb-3 text-sm font-semibold">Tipografia</h3>
+        <div className="grid gap-3 sm:grid-cols-2">
+          {ROLES.map(({ role, label, hint }) => (
+            <FontRolePicker
+              key={role}
+              label={label}
+              hint={hint}
+              value={draft.typography[role].family}
+              onPick={(family) => setRole(role, family)}
+            />
+          ))}
         </div>
-        <p className="text-[11px] text-muted-foreground">
-          Salvar cria uma nova versão do kit. Conteúdos já gerados mantêm o visual da versão em que foram criados.
+        <p className="mt-2 text-[11px] text-muted-foreground">
+          Embarcadas + catálogo do Google Fonts (baixadas e cacheadas — mesma renderização no post final).
         </p>
-      </div>
+      </section>
 
-      {/* Preview ao vivo */}
-      <div>
-        <h3 className="mb-3 text-sm font-semibold">Preview ao vivo</h3>
-        <div className="overflow-hidden rounded-xl border border-border shadow-sm" style={{ width: 420, height: 420 }}>
-          {previewSlide ? (
-            <canvas ref={canvasRef} style={{ width: 420, height: 420, display: 'block' }} />
-          ) : (
-            <Skeleton className="h-full w-full" />
-          )}
+      {/* Paleta */}
+      <section>
+        <h3 className="mb-3 text-sm font-semibold">Paleta</h3>
+        <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
+          {PALETTE_FIELDS.map(({ token, label }) => (
+            <label key={token} className="flex items-center gap-2 rounded-md border border-border p-2">
+              <input
+                type="color"
+                value={draft.palette[token]}
+                onChange={(e) => setPalette(token, e.target.value)}
+                className="h-8 w-8 shrink-0 cursor-pointer rounded border-0 bg-transparent p-0"
+              />
+              <span className="min-w-0">
+                <span className="block truncate text-xs font-medium">{label}</span>
+                <span className="block text-[10px] uppercase text-muted-foreground">{draft.palette[token]}</span>
+              </span>
+            </label>
+          ))}
         </div>
-        <p className="mt-2 text-[11px] text-muted-foreground">Renderizado pelo mesmo engine dos posts.</p>
+      </section>
+
+      <div className="flex gap-2">
+        <Button onClick={() => saveMutation.mutate()} disabled={saveMutation.isPending}>
+          {saveMutation.isPending ? <Loader2 className="size-3.5 animate-spin" data-icon="inline-start" /> : <Save className="size-3.5" data-icon="inline-start" />}
+          Salvar marca
+        </Button>
+        <Button variant="outline" onClick={() => resetMutation.mutate()} disabled={resetMutation.isPending}>
+          <RotateCcw className="size-3.5" data-icon="inline-start" />
+          Restaurar padrão
+        </Button>
       </div>
+      <p className="text-[11px] text-muted-foreground">
+        Salvar cria uma nova versão do kit. Conteúdos já gerados mantêm o visual da versão em que foram criados.
+      </p>
     </div>
   )
 }

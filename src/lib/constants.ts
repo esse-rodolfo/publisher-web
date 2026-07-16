@@ -5,14 +5,10 @@ import type { TemplateFamily } from '@/types/template'
 export const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'
 export const IS_MOCK = process.env.NEXT_PUBLIC_MOCK === 'true'
 
-export const PERSONAS: { value: Persona; label: string; description: string; icon: string }[] = [
-  { value: 'contador', label: 'Contador', description: 'Profissionais contabeis, escritorios, BPO fiscal', icon: 'Calculator' },
-  { value: 'advogado', label: 'Advogado', description: 'Escritorios juridicos, departamentos legais', icon: 'Scale' },
-  { value: 'empresario', label: 'Empresario', description: 'Gestores, donos de empresa, diretores', icon: 'Briefcase' },
-  { value: 'arquiteto', label: 'Arquiteto', description: 'Escritorios de arquitetura e engenharia', icon: 'Ruler' },
-  { value: 'engenheiro', label: 'Engenheiro', description: 'Engenheiros civis, mecanicos, eletricos', icon: 'Wrench' },
-  { value: 'agencia', label: 'Agencia', description: 'Agencias de marketing, publicidade, social media', icon: 'Megaphone' },
-]
+// PERSONAS e PERSONA_COLORS saíram daqui: personas agora são dados por tenant,
+// criados pelo user em /settings/personas. Use `usePersonas()` pra listar e
+// `usePersonaLookup()` pra resolver slug -> nome/cor.
+// Ícones e presets de cor: lib/persona-icons.ts
 
 export const PATTERNS: { value: Pattern; label: string; description: string; score: number }[] = [
   { value: 'A', label: 'Lista de promessas', description: 'X em 8 min. Y em 20. Z no mesmo dia.', score: 16613 },
@@ -55,11 +51,3 @@ export const TEMPLATE_FAMILIES: { value: TemplateFamily; label: string }[] = [
   { value: 'STATIC', label: 'Static' },
 ]
 
-export const PERSONA_COLORS: Record<Persona, { accent: string; soft: string; label: string }> = {
-  contador: { accent: '#3B5D3A', soft: '#E8F0E8', label: 'Verde escuro' },
-  advogado: { accent: '#8B2635', soft: '#F5E8EB', label: 'Bordo' },
-  empresario: { accent: '#DA7756', soft: '#FBF0EC', label: 'Laranja' },
-  arquiteto: { accent: '#C8932F', soft: '#F8F0E0', label: 'Ocre' },
-  engenheiro: { accent: '#4A6FA5', soft: '#E8EFF8', label: 'Azul' },
-  agencia: { accent: '#7B4DAA', soft: '#F0E8F8', label: 'Roxo' },
-}

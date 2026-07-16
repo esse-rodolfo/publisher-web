@@ -7,6 +7,7 @@ import { WizardStepper } from './wizard-stepper'
 import { StepPersona } from './step-persona'
 import { StepPattern } from './step-pattern'
 import { StepTheme } from './step-theme'
+import { StepTemplate } from './step-template'
 import { StepGenerate } from './step-generate'
 import { StepPreview } from './step-preview'
 import { StepSchedule } from './step-schedule'
@@ -23,6 +24,8 @@ function CurrentStep() {
       return <StepPattern />
     case 'theme':
       return <StepTheme />
+    case 'template':
+      return <StepTemplate />
     case 'generating':
       return <StepGenerate />
     case 'studio':

@@ -4,13 +4,16 @@ import type { CustomTemplate } from '@/features/templates/api/templates-api'
 
 /**
  * Máquina de estados explícita do wizard (RFC §7):
- * PERSONA → PATTERN → THEME → GERANDO → STUDIO (editar+caption/cta) → SCHEDULE.
- * `currentStep` (1..6) é mantido p/ o stepper; `phase` é a fase nomeada.
+ * PERSONA → PATTERN → THEME → TEMPLATE → GERANDO → STUDIO (editar+caption/cta) → SCHEDULE.
+ * `currentStep` (1..7) é mantido p/ o stepper; `phase` é a fase nomeada.
  */
-export const WIZARD_PHASES = ['persona', 'pattern', 'theme', 'generating', 'studio', 'schedule'] as const
+export const WIZARD_PHASES = ['persona', 'pattern', 'theme', 'template', 'generating', 'studio', 'schedule'] as const
 export type WizardPhase = (typeof WIZARD_PHASES)[number]
 
-export const phaseForStep = (step: number): WizardPhase => WIZARD_PHASES[Math.min(Math.max(step, 1), 6) - 1]!
+/** clamp derivado das fases: nunca repetir literal de step count. */
+const clampStep = (step: number): number => Math.min(Math.max(step, 1), WIZARD_PHASES.length)
+
+export const phaseForStep = (step: number): WizardPhase => WIZARD_PHASES[clampStep(step) - 1]!
 
 export type WizardTemplate = 'auto' | 'step' | 'compendium' | 'tweet' | 'custom'
 
@@ -42,7 +45,7 @@ interface WizardState {
 }
 
 const stepState = (step: number) => {
-  const s = Math.min(Math.max(step, 1), 6)
+  const s = clampStep(step)
   return { currentStep: s, phase: phaseForStep(s) }
 }
 

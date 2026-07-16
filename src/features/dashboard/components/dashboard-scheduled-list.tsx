@@ -4,13 +4,14 @@ import { Card, CardHeader, CardTitle, CardContent, CardAction } from '@/componen
 import { Skeleton } from '@/components/ui/skeleton'
 import { EmptyState } from '@/components/layout/empty-state'
 import { useDashboard } from '../hooks/use-dashboard'
-import { PERSONA_COLORS } from '@/lib/constants'
+import { usePersonaLookup } from '@/features/personas/hooks/use-personas'
 import { format } from 'date-fns'
 import { ptBR } from 'date-fns/locale'
 import { CalendarClock, Calendar } from 'lucide-react'
 
 export function DashboardScheduledList() {
   const { data, isLoading } = useDashboard()
+  const { lookup: personaLookup } = usePersonaLookup()
 
   if (isLoading || !data) {
     return (
@@ -61,7 +62,7 @@ export function DashboardScheduledList() {
         ) : (
           <div className="divide-y divide-gray-100">
             {data.upcoming.map((item) => {
-              const colors = PERSONA_COLORS[item.persona]
+              const colors = personaLookup(item.persona)
 
               return (
                 <div
@@ -84,8 +85,8 @@ export function DashboardScheduledList() {
                   <span
                     className="inline-flex shrink-0 items-center rounded-full px-2 py-0.5 text-[10px] font-medium"
                     style={{
-                      backgroundColor: colors.soft,
-                      color: colors.accent,
+                      backgroundColor: colors.softHex,
+                      color: colors.accentHex,
                     }}
                   >
                     {item.persona}

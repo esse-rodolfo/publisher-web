@@ -2,7 +2,7 @@ import type { InternalAxiosRequestConfig } from 'axios'
 import { mockContents } from './data/contents'
 import { mockTemplates } from './data/templates'
 import { mockSocialAccounts } from './data/social-accounts'
-import { mockAnalyticsSummary, mockRanking, mockDashboardSummary } from './data/analytics'
+import { mockRanking, mockDashboardSummary } from './data/analytics'
 import { mockLoginResponse, mockUser } from './data/users'
 
 function delay(ms: number) {
@@ -163,20 +163,17 @@ const routes: MockRoute[] = [
   },
   {
     match: (m, u) => m === 'get' && u.includes('/analytics/dashboard'),
-    handle: async () => {
-      await delay(400)
-      return { data: mockDashboardSummary, status: 200 }
-    },
-  },
-  {
-    match: (m, u) => m === 'get' && u.includes('/analytics/summary'),
     handle: async (config) => {
       await delay(400)
       const params = new URLSearchParams(config.url?.split('?')[1] || '')
       const period = params.get('period') || '30d'
       const days = period === '90d' ? 90 : period === '60d' ? 60 : 30
       return {
-        data: { ...mockAnalyticsSummary, period, dailyData: mockAnalyticsSummary.dailyData.slice(-days) },
+        data: {
+          ...mockDashboardSummary,
+          dailyEngagement: mockDashboardSummary.dailyEngagement.slice(-days),
+          postsPerDay: mockDashboardSummary.postsPerDay.slice(-days),
+        },
         status: 200,
       }
     },

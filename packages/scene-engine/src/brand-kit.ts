@@ -92,10 +92,12 @@ export const SEED_BRAND_KIT: BrandKit = {
     termPill: '#2D2A26',
     termPillBorder: '#3A3631',
   },
+  // Strings neutras: nada da marca JP.ASV é herdado por tenant novo. Os campos
+  // seguem no contrato, mas nenhum template renderiza valores do seed.
   brand: {
-    handle: '@JP.ASV',
-    breadcrumb: 'CLAUDE CODE BR',
-    ctaKeyword: 'hoje',
-    logoGlyph: '✻',
+    handle: '',
+    breadcrumb: '',
+    ctaKeyword: '',
+    logoGlyph: '',
   },
 };
