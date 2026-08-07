@@ -8,7 +8,7 @@ import type { Content } from '@/types/content'
 
 const SLIDES_DATA = {
   slug: 'demo-pis-cofins-no-sped',
-  template: 'step',
+  template: 'tweet',
   persona: 'contador',
   label_topo_capa: 'CLAUDE CODE BR',
   label_capa: 'O ERRO DE R$ 30 MIL/ANO',
@@ -63,7 +63,7 @@ export const DEMO_CONTENT: Content = {
   contentType: 'CAROUSEL',
   persona: 'contador',
   pattern: 'A',
-  templateSlug: 'step',
+  templateSlug: 'tweet',
   labelTopoCapa: SLIDES_DATA.label_topo_capa,
   labelCapa: SLIDES_DATA.label_capa,
   hookCapa: SLIDES_DATA.hook_capa,

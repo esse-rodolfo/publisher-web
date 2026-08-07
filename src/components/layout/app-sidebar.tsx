@@ -6,6 +6,7 @@ import {
   LayoutDashboard,
   FileText,
   Palette,
+  Images,
   BarChart3,
   CalendarDays,
   LogOut,
@@ -40,6 +41,7 @@ const navItems = [
   { href: '/content', label: 'Conteudos', icon: FileText },
   { href: '/calendar', label: 'Calendario', icon: CalendarDays },
   { href: '/templates', label: 'Templates', icon: Palette },
+  { href: '/media', label: 'Acervo', icon: Images },
   { href: '/analytics', label: 'Analiticos', icon: BarChart3 },
 ]
 

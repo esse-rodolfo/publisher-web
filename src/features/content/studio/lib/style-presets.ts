@@ -1,8 +1,10 @@
 /**
  * Estilos (presets) de post: família de layout + tipografia + paleta completa.
  * O engine renderiza qualquer kit (tokens não-hardcoded, RFC §13) — um estilo
- * é só um BrandKit nomeado + template. 5 defaults aqui; estilos do usuário
+ * é só um BrandKit nomeado + template. 4 defaults aqui; estilos do usuário
  * vêm de /brand-kit (kits nomeados do tenant).
+ *
+ * A família `step` (template "Editorial") saiu do sistema — nenhum preset a usa.
  */
 import type { BrandKit, DocSettings, LayoutSpec, TemplateFamily } from '@publisher/scene-engine'
 import { SEED_BRAND_KIT } from '@publisher/scene-engine'
@@ -37,13 +39,6 @@ const role = (r: (typeof T)[keyof typeof T]): Role => ({ ...r, weights: [...r.we
 
 export const DEFAULT_PRESETS: StylePreset[] = [
   {
-    id: 'preset/editorial',
-    name: 'Editorial',
-    template: 'step',
-    typography: SEED_BRAND_KIT.typography,
-    palette: SEED_BRAND_KIT.palette,
-  },
-  {
     id: 'preset/terminal',
     name: 'Terminal',
     template: 'compendium',
@@ -64,7 +59,7 @@ export const DEFAULT_PRESETS: StylePreset[] = [
   {
     id: 'preset/minimal',
     name: 'Minimal',
-    template: 'step',
+    template: 'tweet',
     typography: {
       display: role(T.inter),
       body: role(T.inter),
@@ -93,7 +88,7 @@ export const DEFAULT_PRESETS: StylePreset[] = [
   {
     id: 'preset/noite',
     name: 'Noite',
-    template: 'step',
+    template: 'tweet',
     typography: {
       display: role(T.spaceGrotesk),
       body: role(T.inter),
@@ -122,7 +117,7 @@ export const DEFAULT_PRESETS: StylePreset[] = [
   {
     id: 'preset/pastel',
     name: 'Pastel',
-    template: 'step',
+    template: 'tweet',
     typography: {
       display: role(T.poppins),
       body: role(T.jakartaBody),

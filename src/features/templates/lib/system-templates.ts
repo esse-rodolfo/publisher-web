@@ -14,38 +14,38 @@ export interface SystemTemplate {
   id: string
   name: string
   description: string
-  /** família de layout do engine. */
-  family: TemplateFamily
+  /** família de layout do engine ('step'/Editorial não é mais oferecida). */
+  family: Exclude<TemplateFamily, 'step'>
   /** snapshot de estilo aplicado na criação (ex.: Twitter dark). Ausente = kit da marca. */
   styleData?: StyleData
 }
 
-/** Paleta escura estilo X/Twitter (sobre a paleta da marca). */
+/** Paleta "dim" do X: menos dura que preto puro e com o azul nativo da rede. */
 const TWITTER_DARK_PALETTE: StyleData['palette'] = {
   ...SEED_BRAND_KIT.palette,
-  bg: '#000000',
-  bg2: '#16181C',
-  bgRose: '#16181C',
-  cardBg: '#16181C',
-  ink: '#E7E9EA',
-  inkSoft: '#D4D7DA',
-  muted: '#71767B',
-  accent: '#7C6CFF',
-  accentSoft: '#3E3A4A',
-  line: '#2F3336',
+  bg: '#0F1419',
+  bg2: '#17202A',
+  bgRose: '#17202A',
+  cardBg: '#17202A',
+  ink: '#F2F4F5',
+  inkSoft: '#D7DBDE',
+  muted: '#8B98A5',
+  accent: '#1D9BF0',
+  accentSoft: '#184E72',
+  line: '#2F3B46',
 }
 
+/**
+ * A família `step` (antigo template "Editorial") foi retirada do sistema: não é
+ * mais oferecida na galeria, no wizard nem nos estilos. O programa segue
+ * registrado no engine só para renderizar conteúdo antigo já salvo com
+ * `template: 'step'`.
+ */
 export const SYSTEM_TEMPLATES: SystemTemplate[] = [
-  {
-    id: 'step',
-    name: 'Editorial',
-    description: 'Capa serif + slides creme texto-pesado. O carrossel padrão.',
-    family: 'step',
-  },
   {
     id: 'tweet',
     name: 'Twitter',
-    description: 'Cards estilo X/Twitter: avatar, @handle, texto curto e imagem.',
+    description: 'Thread no tema escuro do X: copy conversacional, ritmo adaptativo e imagem opcional.',
     family: 'tweet',
     styleData: {
       presetId: 'system/tweet-dark',

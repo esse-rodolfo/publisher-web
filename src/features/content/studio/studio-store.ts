@@ -332,7 +332,7 @@ export const useStudioStore = create<StudioState>((set) => ({
     set((s) => {
       // sem estilo aplicado, cria um StyleData mínimo (kit do tenant permanece:
       // tipografia/paleta/brand ficam undefined → fallback no use-studio-scene)
-      const base: StyleData = s.style ?? { name: 'Personalizado', template: s.draft?.template ?? 'step' }
+      const base: StyleData = s.style ?? { name: 'Personalizado', template: s.draft?.template ?? 'tweet' }
       const style: StyleData = { ...base, settings: { ...base.settings, ...patch } }
       return { style: clone(style), past: [...s.past, snap(s)], future: [], styleDirty: true }
     }),

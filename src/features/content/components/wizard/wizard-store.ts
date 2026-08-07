@@ -15,7 +15,14 @@ const clampStep = (step: number): number => Math.min(Math.max(step, 1), WIZARD_P
 
 export const phaseForStep = (step: number): WizardPhase => WIZARD_PHASES[clampStep(step) - 1]!
 
-export type WizardTemplate = 'auto' | 'step' | 'compendium' | 'tweet' | 'custom'
+/** 'step' (Editorial) saiu do sistema — não é mais escolhível no wizard. */
+export type WizardTemplate = 'auto' | 'compendium' | 'tweet' | 'custom'
+
+/**
+ * Política de imagem dos slides: IA gera, busca no acervo (/media), upload manual
+ * no estúdio, ou sem imagem. 'ai' é o default — mantém o comportamento atual do backend.
+ */
+export type ImagePolicy = 'ai' | 'bank' | 'upload' | 'none'
 
 interface WizardState {
   currentStep: number
@@ -27,6 +34,8 @@ interface WizardState {
   template: WizardTemplate
   /** template custom escolhido (quando template === 'custom'). */
   selectedCustom: CustomTemplate | null
+  /** de onde vem a imagem dos slides (IA, acervo, upload manual ou nenhuma). */
+  imagePolicy: ImagePolicy
   generatedContent: Content | null
   selectedAccountIds: string[]
   scheduledAt: string | null
@@ -35,6 +44,7 @@ interface WizardState {
   setPattern: (pattern: Pattern) => void
   setTheme: (theme: string) => void
   setTemplate: (template: WizardTemplate, custom?: CustomTemplate | null) => void
+  setImagePolicy: (policy: ImagePolicy) => void
   setGeneratedContent: (content: Content | null) => void
   setAccounts: (ids: string[]) => void
   setSchedule: (date: string | null) => void
@@ -57,6 +67,7 @@ export const useWizardStore = create<WizardState>((set) => ({
   theme: '',
   template: 'auto',
   selectedCustom: null,
+  imagePolicy: 'ai',
   generatedContent: null,
   selectedAccountIds: [],
   scheduledAt: null,
@@ -65,6 +76,7 @@ export const useWizardStore = create<WizardState>((set) => ({
   setPattern: (pattern) => set({ pattern }),
   setTheme: (theme) => set({ theme }),
   setTemplate: (template, custom = null) => set({ template, selectedCustom: custom }),
+  setImagePolicy: (policy) => set({ imagePolicy: policy }),
   setGeneratedContent: (content) => set({ generatedContent: content }),
   setAccounts: (ids) => set({ selectedAccountIds: ids }),
   setSchedule: (date) => set({ scheduledAt: date }),
@@ -79,6 +91,7 @@ export const useWizardStore = create<WizardState>((set) => ({
       theme: '',
       template: 'auto',
       selectedCustom: null,
+      imagePolicy: 'ai',
       generatedContent: null,
       selectedAccountIds: [],
       scheduledAt: null,

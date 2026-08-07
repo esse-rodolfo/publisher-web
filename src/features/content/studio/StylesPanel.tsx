@@ -40,7 +40,9 @@ function kitToPreset(k: ApiKit): StylePreset {
   return {
     id: k.id,
     name: k.name ?? 'Estilo',
-    template: (k.template as TemplateFamily) ?? 'step',
+    // 'step' (Editorial) saiu do sistema: kits salvos naquela família passam a
+    // aplicar 'tweet', o carrossel padrão atual.
+    template: k.template === 'step' ? 'tweet' : ((k.template as TemplateFamily) ?? 'tweet'),
     typography: k.typography,
     palette: k.palette,
     brand: k.brand,
@@ -239,7 +241,7 @@ const ROLES: Array<{ role: keyof BrandKit['typography']; label: string }> = [
 
 function CreateStyleForm({ tenantKit, onCreated }: { tenantKit: BrandKit; onCreated: (style: StyleData) => void }) {
   const [name, setName] = useState('Meu estilo')
-  const [template, setTemplate] = useState<TemplateFamily>('step')
+  const [template, setTemplate] = useState<TemplateFamily>('tweet')
   const [typography, setTypography] = useState<BrandKit['typography']>(JSON.parse(JSON.stringify(tenantKit.typography)))
   const [palette, setPalette] = useState<BrandKit['palette']>({ ...tenantKit.palette })
   const [metrics, setMetrics] = useState<MetricsProvider | null>(null)
@@ -299,9 +301,9 @@ function CreateStyleForm({ tenantKit, onCreated }: { tenantKit: BrandKit; onCrea
         <div>
           <span className="mb-1 block text-xs font-medium">Família de layout</span>
           <div className="flex gap-2">
-            {(['step', 'compendium'] as const).map((t) => (
+            {(['tweet', 'compendium'] as const).map((t) => (
               <button key={t} type="button" onClick={() => setTemplate(t)} className={cn('rounded-md border px-3 py-1.5 text-sm', template === t ? 'border-[#C7634F] bg-[#C7634F]/10 font-medium' : 'border-border hover:bg-muted')}>
-                {t === 'step' ? 'Editorial (passos)' : 'Terminal'}
+                {t === 'tweet' ? 'Twitter' : 'Terminal'}
               </button>
             ))}
           </div>

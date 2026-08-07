@@ -33,6 +33,7 @@ export function StepGenerate() {
   const theme = useWizardStore((s) => s.theme)
   const template = useWizardStore((s) => s.template)
   const selectedCustom = useWizardStore((s) => s.selectedCustom)
+  const imagePolicy = useWizardStore((s) => s.imagePolicy)
   const setGeneratedContent = useWizardStore((s) => s.setGeneratedContent)
   const nextStep = useWizardStore((s) => s.nextStep)
 
@@ -100,6 +101,7 @@ export function StepGenerate() {
         tema: theme,
         persona,
         pattern,
+        imagePolicy,
         ...(template !== 'auto' ? { template } : {}),
         ...(styleData ? { styleData } : {}),
       })

@@ -1,6 +1,6 @@
 'use client'
 
-import { Sparkles } from 'lucide-react'
+import { Sparkles, Images, Upload, ImageOff, type LucideIcon } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { Card, CardContent } from '@/components/ui/card'
 import { Skeleton } from '@/components/ui/skeleton'
@@ -8,7 +8,7 @@ import { SYSTEM_TEMPLATES } from '@/features/templates/lib/system-templates'
 import { TemplateThumb } from '@/features/templates/components/template-thumb'
 import { LayoutPreview } from '@/features/templates/components/layout-preview'
 import { useCustomTemplates } from '@/features/templates/hooks/use-custom-templates'
-import { useWizardStore } from './wizard-store'
+import { useWizardStore, type ImagePolicy } from './wizard-store'
 
 /** resolução interna dos canvases de preview (px). Acima do tamanho exibido p/ nitidez em telas retina. */
 const PREVIEW_SIZE = 320
@@ -23,16 +23,51 @@ const PREVIEW_SIZE = 320
  * largura` (200px = mínimo da trilha, 16px = gap-4); só depois a sobra é dividida
  * igualmente entre as N. NÃO é largura÷N — a trilha nunca nasce abaixo do mínimo.
  * Com max-w-4xl (896px, teto real: `main` é flex-1 p-6, sem max-width) o container
- * satura em 4 trilhas de 212px (848 ≤ 896; 5 pediriam 1064 e não cabem) — é o que
- * acomoda os 4 cards de sistema (Automático + 3 famílias) sem órfão. Abaixo disso:
- * 3 cols a partir de 632px, 2 a partir de 416px, 1 abaixo.
+ * satura em 4 trilhas de 212px (848 ≤ 896; 5 pediriam 1064 e não cabem) — folga
+ * suficiente para os 3 cards de sistema (Automático + 2 famílias) sem órfão. Abaixo
+ * disso: 3 cols a partir de 632px, 2 a partir de 416px, 1 abaixo.
  */
 const GALLERY_GRID = 'grid grid-cols-[repeat(auto-fill,minmax(200px,1fr))] gap-4'
+
+/** Opções da política de imagem dos slides (default 'ai' — comportamento atual do backend). */
+const IMAGE_POLICY_OPTIONS: Array<{
+  value: ImagePolicy
+  label: string
+  description: string
+  icon: LucideIcon
+}> = [
+  {
+    value: 'ai',
+    label: 'Gerar com IA',
+    description: 'A IA cria uma imagem para 1–2 slides',
+    icon: Sparkles,
+  },
+  {
+    value: 'bank',
+    label: 'Buscar no acervo',
+    description: 'Escolhe uma foto do seu acervo pelo assunto',
+    icon: Images,
+  },
+  {
+    value: 'upload',
+    label: 'Eu envio depois',
+    description: 'Você sobe a imagem manualmente no estúdio',
+    icon: Upload,
+  },
+  {
+    value: 'none',
+    label: 'Sem imagem',
+    description: 'Slides só com texto, sem foto',
+    icon: ImageOff,
+  },
+]
 
 export function StepTemplate() {
   const template = useWizardStore((s) => s.template)
   const selectedCustom = useWizardStore((s) => s.selectedCustom)
+  const imagePolicy = useWizardStore((s) => s.imagePolicy)
   const setTemplate = useWizardStore((s) => s.setTemplate)
+  const setImagePolicy = useWizardStore((s) => s.setImagePolicy)
   const nextStep = useWizardStore((s) => s.nextStep)
   const { data: customTemplates, isLoading: isLoadingCustom } = useCustomTemplates()
 
@@ -45,6 +80,38 @@ export function StepTemplate() {
         <p className="text-sm text-muted-foreground mt-1">
           O padrão visual do post. A geração já sai dentro do template escolhido.
         </p>
+      </div>
+
+      {/*
+       * Política de imagem ANTES da galeria: clicar num template auto-avança o step,
+       * então tudo que vem depois da galeria nunca seria visto por quem escaneia de
+       * cima pra baixo. Radiogroup PRÓPRIO, separado do de templates: são duas
+       * escolhas independentes (template ≠ origem da imagem); selecionar aqui NÃO
+       * avança o step.
+       */}
+      <div className="max-w-4xl space-y-3">
+        <div>
+          <h3 id="step-image-policy-heading" className="text-sm font-semibold">
+            Imagem dos slides
+          </h3>
+          <p className="text-xs text-muted-foreground mt-0.5">
+            De onde vem a foto do carrossel. Depois, clique no template para gerar.
+          </p>
+        </div>
+        <div
+          role="radiogroup"
+          aria-labelledby="step-image-policy-heading"
+          className={GALLERY_GRID}
+        >
+          {IMAGE_POLICY_OPTIONS.map((option) => (
+            <ImagePolicyCard
+              key={option.value}
+              option={option}
+              isSelected={imagePolicy === option.value}
+              onSelect={() => setImagePolicy(option.value)}
+            />
+          ))}
+        </div>
       </div>
 
       {/*
@@ -125,7 +192,54 @@ export function StepTemplate() {
           </div>
         )}
       </div>
+
     </div>
+  )
+}
+
+interface ImagePolicyCardProps {
+  option: (typeof IMAGE_POLICY_OPTIONS)[number]
+  isSelected: boolean
+  onSelect: () => void
+}
+
+/**
+ * Card compacto da política de imagem: ícone + rótulo + descrição de 1 linha.
+ * Mesmo idioma visual (ring de seleção, foco, hover) do TemplateCard, mas SEM
+ * avançar o wizard ao selecionar.
+ */
+function ImagePolicyCard({ option, isSelected, onSelect }: ImagePolicyCardProps) {
+  const Icon = option.icon
+  return (
+    <Card
+      size="sm"
+      role="radio"
+      aria-checked={isSelected}
+      tabIndex={0}
+      onClick={onSelect}
+      onKeyDown={(e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault() // Espaço rolaria a página
+          onSelect()
+        }
+      }}
+      className={cn(
+        'cursor-pointer transition-all duration-200 hover:shadow-md',
+        'outline-none focus-visible:ring-3 focus-visible:ring-ring/50',
+        isSelected ? 'ring-2 ring-primary shadow-md' : 'hover:ring-foreground/25'
+      )}
+    >
+      <CardContent className="flex items-start gap-3">
+        <Icon
+          aria-hidden
+          className={cn('mt-0.5 size-4 shrink-0', isSelected ? 'text-primary' : 'text-muted-foreground')}
+        />
+        <div className="min-w-0">
+          <p className="text-sm font-medium">{option.label}</p>
+          <p className="mt-0.5 text-xs text-muted-foreground">{option.description}</p>
+        </div>
+      </CardContent>
+    </Card>
   )
 }
 

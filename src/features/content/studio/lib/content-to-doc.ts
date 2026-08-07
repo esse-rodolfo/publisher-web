@@ -23,8 +23,10 @@ type RawCard = { label?: string; icon?: string; title?: string; body?: string; h
 export type RawSlideImage = {
   enabled: boolean
   role: 'figure' | 'background'
-  prompt: string
-  model: 'nano-banana' | 'gpt-5.5-image'
+  source?: 'ai' | 'bank' | 'upload'
+  asset_id?: string
+  prompt?: string
+  model?: 'nano-banana' | 'gpt-5.5-image'
   seed?: number
   focal?: { x: number; y: number }
   treatment?: 'duotone' | 'grain' | 'none'
@@ -77,6 +79,8 @@ function mapSlideImage(i: RawSlideImage): SlideImage {
   return {
     enabled: i.enabled,
     role: i.role,
+    source: i.source,
+    assetId: i.asset_id,
     prompt: i.prompt,
     model: i.model,
     seed: i.seed,
@@ -110,6 +114,8 @@ function mapSlide(s: RawSlide): SlideText {
 /** Constrói o ContentText preferindo slidesData (raw); fallback p/ campos camelCase do Content. */
 function buildContentText(content: Content): ContentText {
   const raw = (content.slidesData ?? {}) as RawCarousel
+  // legado: conteúdo salvo antes do campo `template` é da era Editorial ('step').
+  // Conteúdo novo sempre traz a família explícita.
   const template: TemplateFamily = raw.template ?? 'step'
 
   if (raw.slides && raw.slides.length) {
@@ -185,6 +191,7 @@ export function collectScenePayloads(content: Content): {
 export function contentTextFromRaw(raw: RawCarousel): ContentText {
   return {
     slug: raw.slug ?? '',
+    // idem: 'step' só como fallback de conteúdo legado (ver buildContentText).
     template: raw.template ?? 'step',
     persona: raw.persona,
     labelTopoCapa: raw.label_topo_capa,
