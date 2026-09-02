@@ -1,0 +1,21 @@
+# node_modules do host NUNCA pode entrar na imagem: o stage `deps` instala para
+# Linux, e um COPY . . por cima traz o que foi compilado na máquina de quem
+# builda. O pnpm detecta a inconsistência e aborta antes de rodar o build.
+node_modules
+**/node_modules
+
+# Artefatos de build refeitos dentro da imagem.
+.next
+out
+dist
+
+# Segredo nunca vai para dentro da imagem. NEXT_PUBLIC_* entra por build arg.
+.env
+.env.*
+
+.git
+.gitignore
+Dockerfile
+.dockerignore
+README.md
+npm-debug.log*
