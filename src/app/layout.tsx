@@ -17,7 +17,7 @@ const geistMono = Geist_Mono({
 })
 
 export const metadata: Metadata = {
-  title: 'Publisher | Bravy Maestria',
+  title: 'Publisher | esse.rodolfo',
   description: 'Sistema de publicacao de conteudo em massa com IA',
 }
 

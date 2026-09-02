@@ -55,7 +55,7 @@ export function LoginForm() {
               Publisher
             </h1>
             <p className="font-mono text-xs text-muted-foreground">
-              Bravy Maestria
+              esse.rodolfo
             </p>
           </div>
         </div>

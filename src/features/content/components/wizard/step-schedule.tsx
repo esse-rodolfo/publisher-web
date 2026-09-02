@@ -21,8 +21,8 @@ const MOCK_ACCOUNTS: SocialAccount[] = [
   {
     id: '1',
     platform: 'INSTAGRAM',
-    accountName: '@bravy.school',
-    accountId: 'bravy_school',
+    accountName: '@esse.rodolfo',
+    accountId: 'esse_rodolfo',
     connected: true,
     tokenExpiresAt: '2026-12-31T23:59:59Z',
     createdAt: '2025-01-01T00:00:00Z',
@@ -30,8 +30,8 @@ const MOCK_ACCOUNTS: SocialAccount[] = [
   {
     id: '2',
     platform: 'LINKEDIN',
-    accountName: 'Bravy School',
-    accountId: 'bravy-school',
+    accountName: 'esse.rodolfo',
+    accountId: 'esse-rodolfo',
     connected: true,
     tokenExpiresAt: '2026-12-31T23:59:59Z',
     createdAt: '2025-01-01T00:00:00Z',

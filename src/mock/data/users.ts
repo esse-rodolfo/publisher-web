@@ -2,11 +2,11 @@ import type { User, LoginResponse } from '@/types/auth'
 
 export const mockUser: User = {
   id: 'usr_01',
-  email: 'tiago@bravy.com.br',
-  name: 'Tiago Teles',
+  email: 'unk.rodolfo@gmail.com',
+  name: 'Rodolfo',
   role: 'OWNER',
   tenantId: 'ten_01',
-  tenantName: 'Bravy',
+  tenantName: 'esse.rodolfo',
   avatarUrl: undefined,
   createdAt: '2025-01-15T10:00:00Z',
 }

@@ -69,7 +69,7 @@ export function AppSidebar() {
               Publisher
             </span>
             <span className="text-[10px] font-mono uppercase tracking-widest text-gray-400">
-              Bravy Maestria
+              esse.rodolfo
             </span>
           </div>
         </Link>
@@ -141,7 +141,7 @@ export function AppSidebar() {
           <DropdownMenuContent align="start" side="top" sideOffset={8} className="w-56">
             <DropdownMenuItem disabled>
               <span className="text-xs text-gray-500">
-                {user?.tenantName || 'Bravy'}
+                {user?.tenantName || 'esse.rodolfo'}
               </span>
             </DropdownMenuItem>
             <DropdownMenuSeparator />

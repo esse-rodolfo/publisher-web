@@ -38,7 +38,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
         <header className="flex h-12 items-center gap-2 border-b px-4">
           <SidebarTrigger className="-ml-1" />
           <Separator orientation="vertical" className="h-4" />
-          <span className="text-xs text-muted-foreground font-mono">publisher.bravy.com.br</span>
+          <span className="text-xs text-muted-foreground font-mono">publisher.esserodolfo.com.br</span>
         </header>
         <main className="flex-1 p-6">{children}</main>
       </SidebarInset>

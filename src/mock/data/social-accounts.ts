@@ -14,7 +14,7 @@ export const mockSocialAccounts: SocialAccount[] = [
   {
     id: 'sa_02',
     platform: 'INSTAGRAM',
-    accountName: '@bravyschool',
+    accountName: '@esse.rodolfo',
     accountId: '44829173622',
     connected: true,
     tokenExpiresAt: '2026-05-25T00:00:00Z',
@@ -24,8 +24,8 @@ export const mockSocialAccounts: SocialAccount[] = [
   {
     id: 'sa_03',
     platform: 'LINKEDIN',
-    accountName: 'Bravy Tecnologia',
-    accountId: 'bravy-tecnologia',
+    accountName: 'esse.rodolfo',
+    accountId: 'esse-rodolfo',
     connected: false,
     tokenExpiresAt: '2026-04-01T00:00:00Z',
     avatarUrl: undefined,
